@@ -1,0 +1,33 @@
+# Dependency directory
+node_modules
+
+# Build generated files
+lib
+dist
+temp
+release
+sharepoint/solution/*.sppkg
+
+# Coverage directory used by testing tools
+coverage
+
+# Bundle analysis
+*.stats.html
+
+# Local environment files
+.env
+*.env.local
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/settings.json
+.idea
+
+# Rush temp
+.rush
+
+# Internal documents
+Internal Documents/

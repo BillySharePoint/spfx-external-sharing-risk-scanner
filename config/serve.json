@@ -1,0 +1,6 @@
+{
+    "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/spfx-serve.schema.json",
+    "port": 4321,
+    "https": true,
+    "initialPage": "https://7ktf8h.sharepoint.com/sites/external-sharing-risk-lab/_layouts/workbench.aspx"
+}

@@ -1,0 +1,17 @@
+{
+    "@microsoft/generator-sharepoint": {
+        "plusBeta": false,
+        "isCreatingSolution": true,
+        "version": "1.20.0",
+        "libraryName": "spfx-external-sharing-risk-scanner",
+        "libraryId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+        "environment": "spo",
+        "packageManager": "npm",
+        "solutionName": "spfx-external-sharing-risk-scanner",
+        "solutionShortDescription": "Review external sharing and permission risk signals for the current SharePoint Online site.",
+        "skipFeatureDeployment": true,
+        "isDomainIsolated": false,
+        "componentType": "webpart",
+        "framework": "react"
+    }
+}
