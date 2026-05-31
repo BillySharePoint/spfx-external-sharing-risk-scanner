@@ -1,235 +1,358 @@
 # SPFx External Sharing Risk Scanner
 
-A read-only SharePoint Framework (SPFx) web part that helps site owners and Microsoft 365 admins identify basic external sharing and permission risk signals on a SharePoint Online site.
+An open-source SharePoint Framework web part for reviewing external sharing, SharePoint group membership, permission inheritance, and governance risk indicators in SharePoint Online.
 
-![SPFx 1.20+](https://img.shields.io/badge/SPFx-1.20+-green.svg)
-![Node.js v22](https://img.shields.io/badge/Node.js-v22%20LTS-green.svg)
-![SharePoint Online](https://img.shields.io/badge/SharePoint-Online-blue.svg)
-![React 17](https://img.shields.io/badge/React-17-blue.svg)
+This project is designed to help SharePoint site owners, Microsoft 365 admins, consultants, and developers quickly surface common permission and external sharing risks directly from a SharePoint site.
 
----
-
-## What It Does
-
-The External Sharing Risk Scanner provides a **quick governance snapshot** of the current SharePoint site:
-
-- **Site Summary** — Shows site title, URL, current user, and scan timestamp
-- **External User Detection** — Flags possible external/guest users using multiple heuristic signals (login patterns, email domain checks)
-- **SharePoint Group Review** — Lists groups with member counts and external user indicators
-- **Permission Inheritance Check** — Identifies the site and document libraries with unique (broken) permissions
-- **Risk Score** — Calculates a transparent 0–100 risk score with labeled categories (Low / Medium / High / Review Recommended)
-- **Recommended Actions** — Provides contextual governance guidance based on findings
+> Need a more advanced version or help adapting this for your tenant?  
+> Contact me: https://www.billyperalta.com/contact
 
 ---
 
-## Screenshots
+## Overview
 
-> *Screenshots to be added after deployment*
+External sharing is useful in SharePoint Online, but it can become difficult to review as sites, libraries, folders, files, guests, and sharing links grow over time.
+
+Many organizations do not struggle because external sharing exists. They struggle because it becomes hard to answer practical governance questions such as:
+
+- Are there external users with access to this site?
+- Are SharePoint groups empty or outdated?
+- Are document libraries using unique permissions?
+- Are permissions inherited or broken?
+- Does this site need a governance review before migration, Copilot rollout, or broader content modernization?
+
+The SPFx External Sharing Risk Scanner provides a lightweight dashboard that helps start those conversations.
 
 ---
 
-## Prerequisites
+## Screenshot
 
-| Requirement | Version |
-|---|---|
-| Node.js | v22 LTS |
-| SharePoint Online | Required |
-| SPFx | 1.20.0+ |
-| PnP PowerShell | Latest (for test setup only) |
+Add a screenshot of the working web part here after uploading it to the repository.
+
+Recommended path:
+
+```txt
+/assets/screenshots/external-sharing-risk-scanner-dashboard.png
+```
+
+Example Markdown:
+
+```md
+![SPFx External Sharing Risk Scanner dashboard](./assets/screenshots/external-sharing-risk-scanner-dashboard.png)
+```
 
 ---
 
-## Setup & Development
+## Key Features
 
-### 1. Clone the repository
+The public MVP includes:
+
+- SharePoint site-level risk summary
+- Visual risk score indicator
+- Scan summary cards
+- SharePoint group review
+- Possible external user indicators
+- Document library inheritance review
+- Unique permission indicators
+- Recommended governance actions
+- Read-only dashboard experience
+- Microsoft 365-friendly UI
+- Contact CTA for advanced/private version or customization
+
+---
+
+## What the Scanner Reviews
+
+The public MVP focuses on practical site-level governance signals.
+
+### Site Summary
+
+Displays basic information about the current SharePoint site, including the scan context and last scanned date/time.
+
+### SharePoint Groups
+
+Reviews SharePoint groups associated with the site and highlights group membership indicators, including possible external users based on configured detection rules.
+
+### Permission Inheritance
+
+Reviews document libraries and identifies whether inheritance appears to be inherited or broken.
+
+### Unique Permissions
+
+Highlights libraries that may require additional review because unique permissions can increase governance complexity and access drift.
+
+### Recommended Actions
+
+Provides practical next steps based on scan findings, such as reviewing empty SharePoint groups, checking libraries with unique permissions, and validating sharing settings with Microsoft 365 admins.
+
+---
+
+## Why This Matters
+
+SharePoint permission issues often become visible too late — during an audit, migration, support ticket, security review, or Copilot readiness assessment.
+
+This project helps demonstrate why organizations should regularly review:
+
+- External sharing
+- SharePoint group membership
+- Broken permission inheritance
+- Unique permissions
+- Empty or outdated groups
+- Governance and ownership gaps
+
+The goal is not to replace enterprise security tools. The goal is to provide a simple, practical starting point that makes permission and sharing conversations easier for site owners and administrators.
+
+---
+
+## Intended Audience
+
+This project may be useful for:
+
+- SharePoint developers
+- SharePoint administrators
+- Microsoft 365 consultants
+- Intranet owners
+- Site collection administrators
+- Governance teams
+- Migration teams
+- Security and compliance stakeholders
+- Technical recruiters or hiring managers reviewing SharePoint/SPFx work
+
+---
+
+## Example Use Cases
+
+### External Sharing Review
+
+A site owner wants to understand whether external users may have access to a SharePoint site and whether the current sharing state should be reviewed.
+
+### Governance Review
+
+A Microsoft 365 admin wants a lightweight way to show why permissions and external sharing should be part of a broader governance process.
+
+### Migration Readiness
+
+A migration team wants to identify sites that may need permission cleanup before content is moved, archived, or modernized.
+
+### Copilot Readiness
+
+An organization preparing for Microsoft 365 Copilot wants to understand whether unclear permissions or oversharing may create content exposure concerns.
+
+### Portfolio / Technical Demonstration
+
+This project demonstrates practical SharePoint Framework development, Microsoft 365 governance thinking, React-based UI design, and real-world SharePoint permission scenarios.
+
+---
+
+## Technical Stack
+
+This project is built with:
+
+- SharePoint Framework
+- React
+- TypeScript
+- Microsoft Graph, where appropriate
+- SharePoint REST APIs, where appropriate
+- PnPjs, where useful
+- Fluent UI / Microsoft 365-friendly design patterns
+- SCSS module-based styling
+
+The web part is designed to be read-only and focused on visibility, review, and guidance.
+
+---
+
+## Recommended Environment
+
+Use the latest supported SharePoint Framework toolchain for new development.
+
+Recommended baseline:
+
+- SPFx 1.22.x or latest stable SPFx version
+- Node.js v22 LTS for SPFx 1.22.x
+- React version supported by the selected SPFx version
+- TypeScript version supported by the selected SPFx version
+- SharePoint Online workbench or hosted workbench for testing
+
+Always confirm the exact Node.js, React, and TypeScript compatibility from the official SPFx compatibility matrix before upgrading the project.
+
+---
+
+## Local Development
+
+Clone the repository:
 
 ```bash
 git clone https://github.com/BillySharePoint/spfx-external-sharing-risk-scanner.git
 cd spfx-external-sharing-risk-scanner
 ```
 
-### 2. Install dependencies
+Install dependencies:
 
 ```bash
 npm install
 ```
 
-### 3. Configure serve target
-
-Edit `config/serve.json` and set your SharePoint site URL:
-
-```json
-{
-  "initialPage": "https://your-tenant.sharepoint.com/sites/your-site/_layouts/workbench.aspx"
-}
-```
-
-### 4. Local development
+Run the local development server:
 
 ```bash
 gulp serve
 ```
 
-This opens the SharePoint Workbench where you can add the web part.
-
-### 5. Build for production
+Bundle the solution:
 
 ```bash
 gulp bundle --ship
+```
+
+Package the solution:
+
+```bash
 gulp package-solution --ship
 ```
 
-The `.sppkg` file will be generated in `sharepoint/solution/`.
+Deploy the generated `.sppkg` file from the `sharepoint/solution` folder to the SharePoint App Catalog.
 
 ---
 
-## Deployment
+## Configuration Notes
 
-1. Build the package:
-   ```bash
-   gulp bundle --ship
-   gulp package-solution --ship
-   ```
+External user detection may depend on your tenant naming patterns, guest account format, login name patterns, and organization-specific domains.
 
-2. Upload `sharepoint/solution/spfx-external-sharing-risk-scanner.sppkg` to your tenant or site app catalog.
+For best results, configure internal domains or known tenant patterns in the web part properties where supported.
 
-3. Approve the solution (no admin consent required for API permissions — the solution uses only delegated SharePoint REST calls).
+Example internal domains:
 
-4. Add the web part to any modern page: **Edit page → Add web part → Search "External Sharing Risk Scanner"**
-
----
-
-## Configuration
-
-### Property Pane Settings
-
-| Property | Description |
-|---|---|
-| **Internal Domains** | Comma-separated list of your organization's email domains (e.g., `contoso.com, contoso.onmicrosoft.com`). Users with email domains NOT in this list will be flagged as possible external users. |
-
-If no internal domains are configured, external user detection is limited to login name pattern checks only (e.g., `#EXT#`).
-
----
-
-## Test Environment Setup
-
-PnP PowerShell scripts are provided in the `scripts/` folder to set up a test site with realistic data:
-
-```powershell
-# Connect to your test site
-.\scripts\Connect-TestSite.ps1
-
-# Create test libraries, groups, and permission scenarios
-.\scripts\Setup-TestEnvironment.ps1
-
-# Verify test data is in place
-.\scripts\Verify-TestData.ps1
-
-# Clean up when done
-.\scripts\Remove-TestEnvironment.ps1
+```txt
+contoso.com
+contoso.onmicrosoft.com
 ```
 
----
-
-## Permissions
-
-This web part uses **only delegated permissions** already available to the current SharePoint user:
-
-| API | Endpoint | Purpose |
-|---|---|---|
-| SharePoint REST | `/_api/web` | Read site properties |
-| SharePoint REST | `/_api/web/currentuser` | Read current user info |
-| SharePoint REST | `/_api/web/siteusers` | List visible site users |
-| SharePoint REST | `/_api/web/sitegroups` | List SharePoint groups |
-| SharePoint REST | `/_api/web/sitegroups/getbyid({id})/users` | List group members |
-| SharePoint REST | `/_api/web/lists` | List document libraries and check permissions |
-
-**No Microsoft Graph permissions are required.**  
-**No admin consent is required.**  
-**No application permissions are used.**
+Without internal domain configuration, external user detection may be limited and should be treated as an indicator, not a final security conclusion.
 
 ---
 
-## Security
+## Permissions and Safety
 
-This solution is **read-only** and:
+This project should be reviewed carefully before use in any production environment.
 
-- Does NOT modify permissions, users, groups, or sharing links
-- Does NOT send data outside the tenant
-- Does NOT call third-party APIs
-- Does NOT store scan results externally
-- Does NOT log sensitive data in production mode
+Depending on the implementation, this solution may require Microsoft Graph or SharePoint permissions to read site, group, user, permission, or sharing-related data.
+
+Before deploying this solution:
+
+- Review all requested API permissions
+- Test in a development tenant first
+- Confirm the solution matches your organization’s governance policies
+- Avoid granting broad tenant-wide permissions unless required and approved
+- Validate scan results against known SharePoint permission scenarios
+- Do not expose sensitive permission data to users who should not see it
+
+This web part should remain read-only by default.
 
 ---
 
 ## Known Limitations
 
-> **Important:** This is a basic visibility tool, not a full security audit.
+The public MVP is intentionally limited and should be treated as a governance helper, not a complete security assessment tool.
 
-- External user detection uses heuristic signals — results are indicators, not definitive
-- Results depend on the current user's SharePoint permissions
-- Does not scan the full Microsoft 365 tenant — only the current site
-- Does not deeply scan every file/folder for item-level permissions
-- Does not enumerate sharing links at the file level
-- Does not replace Microsoft Purview, Defender, audit logs, or formal governance reviews
-- Limited to the first 20 document libraries for permission checks
-- Group member enumeration may fail if the current user lacks permission to view specific groups
+Known limitations may include:
 
----
-
-## Architecture
-
-```
-src/webparts/externalSharingRiskScanner/
-├── ExternalSharingRiskScannerWebPart.ts    # Web part class (PnPjs init, property pane)
-├── components/
-│   ├── ExternalSharingRiskScanner.tsx      # Main orchestrator component
-│   ├── SiteSummaryCard.tsx                 # Site info display
-│   ├── RiskSummaryCard.tsx                 # Risk score visualization
-│   ├── ExternalUsersTable.tsx              # External user list
-│   ├── GroupsSummaryTable.tsx              # SharePoint groups list
-│   ├── PermissionIndicators.tsx            # Permission inheritance display
-│   ├── RecommendedActions.tsx              # Governance recommendations
-│   ├── LoadingState.tsx                    # Loading spinner
-│   ├── ErrorState.tsx                      # Error display
-│   └── EmptyState.tsx                      # No-data display
-├── models/                                 # TypeScript interfaces
-├── services/                               # Data access services
-│   ├── SharePointSiteService.ts            # Site/web data
-│   ├── SharePointUserService.ts            # User enumeration
-│   ├── SharePointGroupService.ts           # Group enumeration
-│   ├── PermissionService.ts                # Permission inheritance checks
-│   ├── RiskScoringService.ts               # Risk score calculation
-│   └── LoggerService.ts                    # Minimal logging
-├── constants/                              # Configuration constants
-├── utils/                                  # Utility functions
-└── loc/                                    # Localization strings
-```
+- External user detection may depend on login name patterns and configured internal domains
+- Tenant-wide sharing settings are not fully evaluated in the public MVP
+- Sharing links may require deeper API coverage depending on implementation
+- Some permission scenarios may need validation through SharePoint admin center, Microsoft Purview, audit logs, or Microsoft Graph reports
+- Results should be verified before making security, compliance, or migration decisions
 
 ---
 
-## Disclaimer
+## Pro Version / Private Access
 
-This tool provides **basic governance indicators** for educational and administrative awareness purposes. It is not a substitute for professional security audits, Microsoft Purview compliance tools, or formal governance reviews.
+A private Pro version of this project may be available for organizations, consultants, or teams that need advanced implementation examples or tenant-specific customization.
 
-The risk score is a simplified indicator based on visible signals and should not be interpreted as a definitive security rating.
+The Pro version can include:
 
-Use at your own risk. The authors are not responsible for any decisions made based on scan results.
+- Advanced external sharing risk scoring
+- CSV export
+- Extended Microsoft Graph examples
+- Additional SharePoint permission checks
+- Additional sharing link checks
+- Tenant-specific configuration patterns
+- Deployment notes
+- Governance checklist
+- Troubleshooting guidance
+- Early access improvements
+- Implementation guidance for real Microsoft 365 environments
+
+If you are interested in the Pro version or need help adapting this project for your Microsoft 365 tenant, please contact me:
+
+https://www.billyperalta.com/contact
+
+Please include:
+
+- Your name
+- Organization or project context
+- What SharePoint/Microsoft 365 problem you are trying to solve
+- Your GitHub username, if requesting private repository access
+
+---
+
+## Roadmap
+
+Planned improvements may include:
+
+- Improved property pane configuration
+- Better internal domain detection
+- Additional permission inheritance checks
+- Additional external sharing indicators
+- Improved empty state messages
+- More detailed scan result explanations
+- Screenshot and documentation updates
+- Optional export capability in a future/pro version
+- Additional governance recommendation logic
 
 ---
 
 ## Contributing
 
-Contributions are welcome! Please open an issue first to discuss proposed changes.
+Contributions, suggestions, and issue reports are welcome.
+
+Before contributing, please keep the project goal in mind: this tool should remain practical, readable, and useful for SharePoint/Microsoft 365 governance scenarios.
+
+Suggested contribution areas:
+
+- Bug fixes
+- Documentation improvements
+- UI/UX improvements
+- Additional safe read-only checks
+- Better configuration guidance
+- More realistic test scenarios
 
 ---
 
 ## License
 
-MIT
+This public version is released under the MIT License. See the `LICENSE` file for details.
+
+The private Pro version, if requested or provided, may use a separate license or access agreement.
 
 ---
 
-## Pro / Custom Version
+## Disclaimer
 
-Need advanced capabilities like tenant-wide scanning, deep file-level permission analysis, sharing link enumeration, scheduled scans, or export features? Contact us for custom governance solutions.
+This project is provided as a technical sample and governance helper for SharePoint Online and Microsoft 365 environments.
+
+Before using this in a production tenant, review all Microsoft Graph permissions, SharePoint API permissions, deployment settings, and organizational security requirements.
+
+This project does not replace a formal Microsoft 365 security review, compliance review, legal review, or governance assessment.
+
+Use this project at your own discretion and validate all findings in your own environment.
+
+---
+
+## About
+
+Created by Billy Peralta.
+
+I build practical SharePoint, Microsoft 365, and SPFx solutions focused on governance, permissions, migrations, intranet solutions, automation, and real enterprise problems.
+
+Portfolio: https://www.billyperalta.com  
+Contact: https://www.billyperalta.com/contact

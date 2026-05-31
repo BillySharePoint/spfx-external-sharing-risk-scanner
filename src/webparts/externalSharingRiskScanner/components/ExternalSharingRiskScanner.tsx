@@ -30,10 +30,10 @@ export interface IExternalSharingRiskScannerProps {
 
 const riskColorMap: Record<string, string> = {
     Low: '#107c10',
-    Medium: '#ca5010',
-    High: '#a4262c',
-    'Review Recommended': '#a4262c',
-    Unknown: '#6b7280',
+    Medium: '#ffb900',
+    High: '#d13438',
+    'Review Recommended': '#d13438',
+    Unknown: '#8a8886',
 };
 
 const riskBadgeClass = (label: RiskLabel): string => {
@@ -42,7 +42,7 @@ const riskBadgeClass = (label: RiskLabel): string => {
         case 'Medium': return styles.badgeWarning;
         case 'High': return styles.badgeDanger;
         case 'Review Recommended': return styles.badgeDanger;
-        default: return styles.badgeInfo;
+        default: return styles.badgeNeutral;
     }
 };
 
@@ -52,6 +52,76 @@ const parseInternalDomains = (raw: string): string[] =>
         .map((d) => d.trim().toLowerCase())
         .filter((d) => d.length > 0);
 
+/* ────────────────── Recommended Action Model ─────────────────────── */
+
+interface IRecommendedAction {
+    priority: 'High' | 'Medium' | 'Low';
+    title: string;
+    reason: string;
+    suggestedOwner: string;
+}
+
+const deriveActions = (
+    externalUserCount: number,
+    emptyGroupCount: number,
+    uniquePermCount: number,
+    errorCount: number
+): IRecommendedAction[] => {
+    const actions: IRecommendedAction[] = [];
+
+    if (externalUserCount > 0) {
+        actions.push({
+            priority: 'High',
+            title: 'Review external users in SharePoint groups',
+            reason: `${externalUserCount} possible external user(s) detected — confirm they still need access.`,
+            suggestedOwner: 'Site owner or M365 admin',
+        });
+    }
+
+    if (uniquePermCount > 0) {
+        actions.push({
+            priority: 'Medium',
+            title: 'Review libraries with unique permissions',
+            reason: 'Unique permissions can increase governance complexity and access drift.',
+            suggestedOwner: 'Site owner',
+        });
+    }
+
+    if (emptyGroupCount > 0) {
+        actions.push({
+            priority: 'Medium',
+            title: 'Review empty SharePoint groups',
+            reason: `${emptyGroupCount} empty group(s) may indicate stale or incomplete permission setup.`,
+            suggestedOwner: 'Site owner or M365 admin',
+        });
+    }
+
+    if (errorCount > 0) {
+        actions.push({
+            priority: 'Medium',
+            title: 'Resolve scan errors',
+            reason: `${errorCount} error(s) occurred — some data may be incomplete. Ensure sufficient permissions.`,
+            suggestedOwner: 'Site Collection Administrator',
+        });
+    }
+
+    actions.push({
+        priority: 'Low',
+        title: 'Validate external sharing settings with your M365 admin',
+        reason: 'This web part only shows selected indicators from the current site context.',
+        suggestedOwner: 'M365 admin',
+    });
+
+    actions.push({
+        priority: 'Low',
+        title: 'Confirm whether external access is still needed',
+        reason: 'Review before migration, Copilot rollout, or tenant-wide governance audits.',
+        suggestedOwner: 'Site owner',
+    });
+
+    return actions;
+};
+
 /* ────────────────────────────── Component ─────────────────────────── */
 
 const ExternalSharingRiskScanner: React.FC<IExternalSharingRiskScannerProps> = (props) => {
@@ -60,7 +130,7 @@ const ExternalSharingRiskScanner: React.FC<IExternalSharingRiskScannerProps> = (
     const [scanResult, setScanResult] = React.useState<IScanResult | null>(null);
     const [isScanning, setIsScanning] = React.useState<boolean>(false);
     const [hasScanned, setHasScanned] = React.useState<boolean>(false);
-    const [showDetails, setShowDetails] = React.useState<boolean>(false);
+    const [showErrors, setShowErrors] = React.useState<boolean>(false);
 
     /* ── services ── */
     const siteService = React.useMemo(() => new SharePointSiteService(sp), [sp]);
@@ -129,54 +199,84 @@ const ExternalSharingRiskScanner: React.FC<IExternalSharingRiskScannerProps> = (
     }, [sp, siteUrl, domains, hasInternalDomains, siteService, userService, groupService, permissionService, riskScoringService]);
 
     /* ── derived data ── */
-    const externalUserCount = scanResult?.users?.filter((u) => u.isPossibleExternal).length ?? 0;
-    const groupCount = scanResult?.groups?.length ?? 0;
-    const libraryIndicators = scanResult?.permissionIndicators?.filter((p) => p.scope === 'Library') ?? [];
+    const r = scanResult;
+    const externalUserCount = r?.users?.filter((u) => u.isPossibleExternal).length ?? 0;
+    const groupCount = r?.groups?.length ?? 0;
+    const emptyGroupCount = r?.groups?.filter((g) => g.isEmpty).length ?? 0;
+    const libraryIndicators = r?.permissionIndicators?.filter((p) => p.scope === 'Library') ?? [];
     const libraryCount = libraryIndicators.length;
     const uniquePermCount = libraryIndicators.filter((p) => p.hasUniquePermissions).length;
 
-    const riskScore = scanResult?.riskScore;
-    const riskColor = riskScore ? (riskColorMap[riskScore.label] || '#6b7280') : '#6b7280';
+    const riskScore = r?.riskScore;
+    const riskColor = riskScore ? (riskColorMap[riskScore.label] || '#8a8886') : '#8a8886';
     const riskAngle = riskScore ? riskScore.score * 3.6 : 0;
 
     /* ── findings ── */
-    const findings = React.useMemo(() => {
-        if (!scanResult) return [];
-        const items: Array<{ severity: 'success' | 'warning' | 'info' | 'danger'; icon: string; title: string; description: string; badge: string }> = [];
+    type Severity = 'success' | 'warning' | 'info' | 'danger';
+    interface IFinding { severity: Severity; icon: string; title: string; description: string }
+
+    const findings = React.useMemo((): IFinding[] => {
+        if (!r) return [];
+        const items: IFinding[] = [];
 
         if (externalUserCount === 0) {
-            items.push({ severity: 'success', icon: '✓', title: 'No external users detected', description: 'No external users were found in the SharePoint groups scanned.', badge: 'Good' });
+            items.push({ severity: 'success', icon: '✓', title: 'No possible external users detected', description: 'No external users were found in the SharePoint groups scanned. Tenant-wide sharing settings and sharing links should still be reviewed separately.' });
         } else {
-            items.push({ severity: 'danger', icon: '!', title: `${externalUserCount} possible external user(s)`, description: 'External users detected — review access promptly.', badge: 'Action' });
+            items.push({ severity: 'danger', icon: '!', title: `${externalUserCount} possible external user(s) detected`, description: 'External users detected in SharePoint groups — review access promptly.' });
         }
 
         if (uniquePermCount > 0) {
-            items.push({ severity: 'warning', icon: '!', title: 'Libraries need review', description: `${uniquePermCount} librar${uniquePermCount === 1 ? 'y has' : 'ies have'} unique permissions and may increase governance complexity.`, badge: 'Review' });
+            items.push({ severity: 'warning', icon: '⚠', title: `${uniquePermCount} librar${uniquePermCount === 1 ? 'y has' : 'ies have'} unique permissions`, description: 'Unique permissions are not automatically bad, but they should be reviewed because they can increase governance complexity.' });
+        }
+
+        if (emptyGroupCount > 0) {
+            items.push({ severity: 'warning', icon: '⚠', title: `${emptyGroupCount} empty SharePoint group(s) found`, description: `${emptyGroupCount} SharePoint group(s) have no members. This may be expected in a test site, but in production it can indicate stale or incomplete permission setup.` });
         }
 
         if (groupCount > 0) {
-            items.push({ severity: 'info', icon: 'i', title: 'Groups scanned', description: `${groupCount} SharePoint groups were scanned for possible external users.`, badge: 'Info' });
+            items.push({ severity: 'info', icon: 'i', title: `${groupCount} SharePoint groups scanned`, description: `${groupCount} SharePoint groups were scanned for possible external users.` });
         }
 
-        if (scanResult.errors.length > 0) {
-            items.push({ severity: 'warning', icon: '!', title: 'Scan completed with errors', description: `${scanResult.errors.length} error(s) — some data may be incomplete.`, badge: 'Review' });
+        if (r.errors.length > 0) {
+            items.push({ severity: 'warning', icon: '⚠', title: 'Scan completed with errors', description: `${r.errors.length} error(s) occurred — some data may be incomplete.` });
         }
 
         return items;
-    }, [scanResult, externalUserCount, uniquePermCount, groupCount]);
+    }, [r, externalUserCount, uniquePermCount, emptyGroupCount, groupCount]);
 
-    /* ── severity CSS map ── */
-    const severityFindingClass: Record<string, string> = {
+    /* ── recommended actions ── */
+    const recommendedActions = React.useMemo((): IRecommendedAction[] => {
+        if (!r) return [];
+        return deriveActions(externalUserCount, emptyGroupCount, uniquePermCount, r.errors.length);
+    }, [r, externalUserCount, emptyGroupCount, uniquePermCount]);
+
+    /* ── severity CSS maps ── */
+    const severityFindingCls: Record<Severity, string> = {
         success: styles.findingSuccess,
         warning: styles.findingWarning,
         info: styles.findingInfo,
         danger: styles.findingDanger,
     };
-    const severityBadgeClass: Record<string, string> = {
-        success: styles.badgeSuccess,
-        warning: styles.badgeWarning,
-        info: styles.badgeInfo,
-        danger: styles.badgeDanger,
+    const severityIconCls: Record<Severity, string> = {
+        success: styles.findingIconSuccess,
+        warning: styles.findingIconWarning,
+        info: styles.findingIconInfo,
+        danger: styles.findingIconDanger,
+    };
+
+    const priorityCls: Record<string, string> = {
+        High: styles.priorityHigh,
+        Medium: styles.priorityMedium,
+        Low: styles.priorityLow,
+    };
+
+    /* ── metric card helper ── */
+    const getMetricStatus = (label: string, count: number): string => {
+        if (label === 'Possible external users') return count === 0 ? 'No external users detected' : 'Review recommended';
+        if (label === 'Groups reviewed') return `${count} SharePoint group(s) scanned`;
+        if (label === 'Libraries reviewed') return `${count} document librar${count === 1 ? 'y' : 'ies'} checked`;
+        if (label === 'Unique permissions') return count === 0 ? 'All libraries inherit permissions' : `${count} librar${count === 1 ? 'y' : 'ies'} may need review`;
+        return '';
     };
 
     /* ────────── JSX ────────── */
@@ -184,39 +284,31 @@ const ExternalSharingRiskScanner: React.FC<IExternalSharingRiskScannerProps> = (
     return (
         <div className={styles.externalSharingRiskScanner}>
             <div className={styles.shell}>
-                {/* ── Header ── */}
+                {/* ── Header / Command Bar ── */}
                 <section className={styles.header}>
-                    <div>
-                        <div className={styles.kicker}>🛡️ SharePoint governance tool</div>
+                    <div className={styles.headerLeft}>
                         <h1 className={styles.title}>External Sharing Risk Scanner</h1>
                         <p className={styles.description}>
-                            Review external sharing, SharePoint group membership, and permission inheritance
-                            indicators for the current SharePoint site. This public MVP is read-only and designed to
-                            support governance conversations, migration readiness reviews, and Copilot readiness checks.
+                            Review external sharing and permission risk signals for the current SharePoint site.
                         </p>
+                        {r && (
+                            <p className={styles.timestamp}>Last scanned: {r.siteSummary.scannedAt}</p>
+                        )}
                     </div>
                     <div className={styles.headerActions}>
-                        {hasScanned && (
-                            <button
-                                className={`${styles.button} ${styles.buttonSecondary}`}
-                                type="button"
-                                onClick={() => setShowDetails(!showDetails)}
-                            >
-                                {showDetails ? 'Hide details' : 'View details'}
-                            </button>
-                        )}
                         <button
                             className={`${styles.button} ${styles.buttonPrimary}`}
                             type="button"
                             onClick={runScan}
                             disabled={isScanning}
+                            aria-label={isScanning ? 'Scanning in progress' : 'Scan site for external sharing risks'}
                         >
                             {isScanning ? 'Scanning…' : 'Scan site'}
                         </button>
                     </div>
                 </section>
 
-                {/* ── Warning alert ── */}
+                {/* ── Warning: no internal domains ── */}
                 {!hasInternalDomains && (
                     <div className={`${styles.alert} ${styles.alertWarning}`} role="status">
                         <span className={styles.alertIcon}>⚠️</span>
@@ -231,103 +323,89 @@ const ExternalSharingRiskScanner: React.FC<IExternalSharingRiskScannerProps> = (
                 {/* ── Loading ── */}
                 {isScanning && <LoadingState />}
 
-                {/* ── Scan errors (detail toggle) ── */}
-                {showDetails && scanResult && scanResult.errors.length > 0 && (
+                {/* ── Scan errors toggle ── */}
+                {r && r.errors.length > 0 && !isScanning && (
                     <div className={`${styles.alert} ${styles.alertWarning}`} role="alert">
                         <span className={styles.alertIcon}>⚠️</span>
                         <div>
-                            <strong>{scanResult.errors.length} error(s) during scan:</strong>
-                            <ul style={{ margin: '4px 0 0 16px', padding: 0 }}>
-                                {scanResult.errors.map((e, i) => (
-                                    <li key={i}>{e.source}: {e.message}</li>
-                                ))}
-                            </ul>
+                            <strong>{r.errors.length} error(s) during scan.</strong>{' '}
+                            <button
+                                type="button"
+                                className={styles.collapseToggle}
+                                onClick={() => setShowErrors(!showErrors)}
+                            >
+                                <span className={`${styles.collapseArrow} ${showErrors ? styles.collapseArrowOpen : ''}`}>▶</span>
+                                {showErrors ? 'Hide details' : 'Show details'}
+                            </button>
+                            {showErrors && (
+                                <ul style={{ margin: '8px 0 0 16px', padding: 0 }}>
+                                    {r.errors.map((e, i) => (
+                                        <li key={i} style={{ marginBottom: 4 }}>{e.source}: {e.message}</li>
+                                    ))}
+                                </ul>
+                            )}
                         </div>
                     </div>
                 )}
 
                 {/* ── Results ── */}
-                {scanResult && !isScanning && (
+                {r && !isScanning && (
                     <>
-                        {/* ── Overview Grid ── */}
-                        <section className={styles.overviewGrid} aria-label="Risk overview">
-                            {/* Risk Score Card */}
-                            <article className={`${styles.card}`}>
-                                <div className={styles.cardHeader} style={{ width: '100%' }}>
+                        {/* ── Dashboard Metric Cards ── */}
+                        <section className={styles.metricsRow} aria-label="Summary metrics">
+                            <MetricCard icon="👥" title="Possible external users" value={externalUserCount} status={getMetricStatus('Possible external users', externalUserCount)} statusType={externalUserCount === 0 ? 'success' : 'danger'} />
+                            <MetricCard icon="🧩" title="Groups reviewed" value={groupCount} status={getMetricStatus('Groups reviewed', groupCount)} statusType="neutral" />
+                            <MetricCard icon="📚" title="Libraries reviewed" value={libraryCount} status={getMetricStatus('Libraries reviewed', libraryCount)} statusType="neutral" />
+                            <MetricCard icon="🔓" title="Unique permissions" value={uniquePermCount} status={getMetricStatus('Unique permissions', uniquePermCount)} statusType={uniquePermCount === 0 ? 'success' : 'warning'} />
+                        </section>
+
+                        {/* ── Risk Score + Key Findings ── */}
+                        <section className={styles.riskScoreSection}>
+                            {/* Risk Assessment Card */}
+                            <article className={styles.card}>
+                                <div className={styles.cardHeader}>
                                     <div>
-                                        <h2 className={styles.cardTitle}>Risk Score</h2>
-                                        <p className={styles.cardSubtitle}>Last scanned: {scanResult.siteSummary.scannedAt}</p>
+                                        <h2 className={styles.cardTitle}>Risk Assessment</h2>
+                                        <p className={styles.cardSubtitle}>{riskScore!.score} / 100 — {riskScore!.label}</p>
                                     </div>
                                     <span className={`${styles.badge} ${riskBadgeClass(riskScore!.label)}`}>
                                         {riskScore!.label}
                                     </span>
                                 </div>
                                 <div className={styles.cardBody}>
-                                    <div className={styles.riskScoreCard}>
+                                    <div className={styles.riskScoreVisual}>
                                         <div
                                             className={styles.riskRing}
-                                            aria-label={`Risk score ${riskScore!.score} out of 100`}
-                                            style={{
-                                                background: `conic-gradient(${riskColor} 0deg ${riskAngle}deg, #edf2f7 ${riskAngle}deg 360deg)`,
-                                            }}
+                                            aria-label={`Risk score ${riskScore!.score} out of 100, ${riskScore!.label}`}
+                                            style={{ background: `conic-gradient(${riskColor} 0deg ${riskAngle}deg, #f3f2f1 ${riskAngle}deg 360deg)` }}
                                         >
                                             <div className={styles.riskRingInner} />
                                             <div className={styles.riskRingContent}>
-                                                <div className={styles.riskNumber} style={{ color: riskColor }}>
-                                                    {riskScore!.score}
-                                                </div>
-                                                <div className={styles.riskLabel}>/100 Risk</div>
+                                                <div className={styles.riskNumber} style={{ color: riskColor }}>{riskScore!.score}</div>
+                                                <div className={styles.riskSubLabel}>/100</div>
                                             </div>
                                         </div>
-
-                                        <p className={styles.summaryText}>
-                                            {riskScore!.reasons[0] || 'No significant risk indicators detected.'}
-                                        </p>
-
-                                        <ul className={styles.metaList}>
-                                            <li className={styles.metaItem}>
-                                                <span className={styles.metaLabel}>Current site</span>
-                                                <span className={styles.metaValue}>{scanResult.siteSummary.title}</span>
-                                            </li>
-                                            <li className={styles.metaItem}>
-                                                <span className={styles.metaLabel}>Permission level</span>
-                                                <span className={styles.metaValue}>
-                                                    {scanResult.siteSummary.currentUserPermissionLevel || 'Unknown'}
-                                                </span>
-                                            </li>
-                                            <li className={styles.metaItem}>
-                                                <span className={styles.metaLabel}>Risk status</span>
-                                                <span className={styles.metaValue}>
-                                                    {riskScore!.label === 'Low' ? 'Healthy' : 'Review needed'}
-                                                </span>
-                                            </li>
-                                        </ul>
+                                        <div className={styles.riskDetails}>
+                                            <p className={styles.riskSummary}>
+                                                {riskScore!.reasons[0] || 'No significant risk indicators detected.'}
+                                            </p>
+                                            {riskScore!.reasons.length > 1 && (
+                                                <ul className={styles.riskFactors}>
+                                                    {riskScore!.reasons.slice(1).map((reason, i) => (
+                                                        <li key={i}>{reason}</li>
+                                                    ))}
+                                                </ul>
+                                            )}
+                                        </div>
+                                    </div>
+                                    <div className={styles.riskBar}>
+                                        <div className={styles.riskBarFill} style={{ width: `${riskScore!.score}%`, background: riskColor }} />
                                     </div>
                                 </div>
                             </article>
 
-                            {/* Scan Summary Card */}
-                            <article className={styles.card}>
-                                <div className={styles.cardHeader}>
-                                    <div>
-                                        <h2 className={styles.cardTitle}>Scan Summary</h2>
-                                        <p className={styles.cardSubtitle}>Key indicators from the current SharePoint site</p>
-                                    </div>
-                                </div>
-                                <div className={styles.cardBody}>
-                                    <div className={styles.metricsGrid}>
-                                        <MetricTile icon="👥" value={externalUserCount} label="Possible external users" note="External users detected in scanned groups." />
-                                        <MetricTile icon="🧩" value={groupCount} label="Groups reviewed" note="SharePoint groups scanned for external access." />
-                                        <MetricTile icon="📚" value={libraryCount} label="Libraries reviewed" note="Document libraries checked for inheritance status." />
-                                        <MetricTile icon="🔓" value={uniquePermCount} label="Unique permission sets" note="Libraries with broken inheritance need review." />
-                                    </div>
-                                </div>
-                            </article>
-                        </section>
-
-                        {/* ── Key Findings ── */}
-                        {findings.length > 0 && (
-                            <section className={styles.sectionGrid}>
+                            {/* Key Findings Card */}
+                            {findings.length > 0 && (
                                 <article className={styles.card}>
                                     <div className={styles.cardHeader}>
                                         <div>
@@ -338,32 +416,35 @@ const ExternalSharingRiskScanner: React.FC<IExternalSharingRiskScannerProps> = (
                                     <div className={styles.cardBody}>
                                         <div className={styles.findingsList}>
                                             {findings.map((f, idx) => (
-                                                <div key={idx} className={`${styles.finding} ${severityFindingClass[f.severity] || ''}`}>
-                                                    <div className={styles.findingIcon}>{f.icon}</div>
-                                                    <div>
+                                                <div key={idx} className={`${styles.finding} ${severityFindingCls[f.severity]}`}>
+                                                    <div className={`${styles.findingIcon} ${severityIconCls[f.severity]}`}>{f.icon}</div>
+                                                    <div className={styles.findingBody}>
                                                         <p className={styles.findingTitle}>{f.title}</p>
                                                         <p className={styles.findingDescription}>{f.description}</p>
                                                     </div>
-                                                    <span className={`${styles.badge} ${severityBadgeClass[f.severity] || ''}`}>
-                                                        {f.badge}
-                                                    </span>
                                                 </div>
                                             ))}
                                         </div>
                                     </div>
                                 </article>
-                            </section>
-                        )}
+                            )}
+                        </section>
 
-                        {/* ── Two-Column Grid: Groups + Permissions ── */}
+                        {/* ── Site Summary + Scope/Limitations ── */}
                         <section className={styles.twoColumnGrid}>
-                            <GroupsTable groups={scanResult.groups} />
-                            <PermissionsTable indicators={libraryIndicators} />
+                            <SiteSummaryCard siteSummary={r.siteSummary} />
+                            <ScopeLimitationsCard />
+                        </section>
+
+                        {/* ── Groups Table + Permission Inheritance ── */}
+                        <section className={styles.twoColumnGrid}>
+                            <GroupsTable groups={r.groups} />
+                            <PermissionsCard indicators={libraryIndicators} />
                         </section>
 
                         {/* ── Recommended Actions ── */}
-                        {riskScore && riskScore.recommendedActions.length > 0 && (
-                            <section className={styles.sectionGrid} style={{ marginTop: 16 }}>
+                        {recommendedActions.length > 0 && (
+                            <section className={styles.sectionSpacing}>
                                 <article className={styles.card}>
                                     <div className={styles.cardHeader}>
                                         <div>
@@ -373,11 +454,15 @@ const ExternalSharingRiskScanner: React.FC<IExternalSharingRiskScannerProps> = (
                                     </div>
                                     <div className={styles.cardBody}>
                                         <ol className={styles.actionsList}>
-                                            {riskScore.recommendedActions.map((action, idx) => (
+                                            {recommendedActions.map((action, idx) => (
                                                 <li key={idx} className={styles.actionItem}>
-                                                    <span className={styles.actionNumber}>{idx + 1}</span>
-                                                    <div>
-                                                        <p className={styles.actionTitle}>{action}</p>
+                                                    <span className={`${styles.actionPriority} ${priorityCls[action.priority] || ''}`}>
+                                                        {action.priority}
+                                                    </span>
+                                                    <div className={styles.actionBody}>
+                                                        <p className={styles.actionTitle}>{action.title}</p>
+                                                        <p className={styles.actionReason}>{action.reason}</p>
+                                                        <p className={styles.actionOwner}>Suggested owner: {action.suggestedOwner}</p>
                                                     </div>
                                                 </li>
                                             ))}
@@ -387,22 +472,37 @@ const ExternalSharingRiskScanner: React.FC<IExternalSharingRiskScannerProps> = (
                             </section>
                         )}
 
-                        {/* ── Footer Note ── */}
-                        <div className={styles.footerNote}>
-                            Scanner results provide indicators for governance review. For a full assessment, validate
-                            results with the SharePoint admin center, Microsoft Purview, audit logs, and tenant-level
-                            sharing settings.
+                        {/* ── Footer ── */}
+                        <div className={styles.footer}>
+                            <p style={{ margin: '0 0 6px 0' }}>
+                                This public MVP provides site-level indicators only. For a full governance review,
+                                validate results with the SharePoint admin center, Microsoft Purview, audit logs, and
+                                tenant-level sharing settings.
+                            </p>
+                            <p style={{ margin: 0 }}>
+                                Need deeper reporting, CSV export, or tenant-specific governance checks?{' '}
+                                <a
+                                    className={styles.footerLink}
+                                    href="https://www.billyperalta.com/contact"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                >
+                                    Contact Billy Peralta
+                                </a>{' '}
+                                for Pro/private access or customization.
+                            </p>
                         </div>
                     </>
                 )}
 
-                {/* ── Pre-scan (no results yet) ── */}
+                {/* ── Pre-scan ── */}
                 {!hasScanned && !isScanning && (
                     <div className={`${styles.alert} ${styles.alertInfo}`} role="status">
                         <span className={styles.alertIcon}>ℹ️</span>
                         <div>
                             Click <strong>Scan site</strong> to begin analyzing external sharing risks for this
-                            SharePoint site.
+                            SharePoint site. The scan reviews SharePoint groups, document library permission
+                            inheritance, and possible external user indicators.
                         </div>
                     </div>
                 )}
@@ -411,38 +511,130 @@ const ExternalSharingRiskScanner: React.FC<IExternalSharingRiskScannerProps> = (
     );
 };
 
-/* ─────────── Small inline sub-components ─────────── */
+/* ─────────── Sub-components ─────────── */
 
-interface IMetricTileProps {
+/* ── Metric Card ── */
+interface IMetricCardProps {
     icon: string;
+    title: string;
     value: number;
-    label: string;
-    note: string;
+    status: string;
+    statusType: 'success' | 'warning' | 'danger' | 'neutral';
 }
 
-const MetricTile: React.FC<IMetricTileProps> = ({ icon, value, label, note }) => (
+const statusColorMap: Record<string, string> = {
+    success: '#107c10',
+    warning: '#835b00',
+    danger: '#d13438',
+    neutral: '#605e5c',
+};
+
+const MetricCard: React.FC<IMetricCardProps> = ({ icon, title, value, status, statusType }) => (
     <div className={styles.metricCard}>
-        <div className={styles.metricIcon}>{icon}</div>
+        <div className={styles.metricCardHeader}>
+            <p className={styles.metricTitle}>{title}</p>
+            <span className={styles.metricIcon}>{icon}</span>
+        </div>
         <p className={styles.metricValue}>{value}</p>
-        <p className={styles.metricLabel}>{label}</p>
-        <p className={styles.metricNote}>{note}</p>
+        <p className={styles.metricStatus} style={{ color: statusColorMap[statusType] }}>{status}</p>
     </div>
 );
 
+/* ── Site Summary Card ── */
+interface ISiteSummaryCardProps {
+    siteSummary: { title: string; url: string; webId?: string; currentUserDisplayName?: string; currentUserPermissionLevel?: string; scannedAt: string };
+}
+
+const SiteSummaryCard: React.FC<ISiteSummaryCardProps> = ({ siteSummary }) => {
+    const rows: Array<{ label: string; value: string }> = [
+        { label: 'Site title', value: siteSummary.title },
+        { label: 'Site URL', value: siteSummary.url },
+        { label: 'Current user', value: siteSummary.currentUserDisplayName || '—' },
+        { label: 'Permission level', value: siteSummary.currentUserPermissionLevel || '—' },
+        { label: 'Scan time', value: siteSummary.scannedAt },
+    ];
+    if (siteSummary.webId) {
+        rows.push({ label: 'Web ID', value: siteSummary.webId });
+    }
+
+    return (
+        <article className={styles.card}>
+            <div className={styles.cardHeader}>
+                <div>
+                    <h2 className={styles.cardTitle}>Site Summary</h2>
+                    <p className={styles.cardSubtitle}>Current site context and identity</p>
+                </div>
+            </div>
+            <div className={styles.cardBody}>
+                <div className={styles.summaryGrid}>
+                    {rows.map((row, i) => (
+                        <div key={i} className={styles.summaryRow}>
+                            <span className={styles.summaryLabel}>{row.label}</span>
+                            <span className={styles.summaryValue}>{row.value}</span>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        </article>
+    );
+};
+
+/* ── Scope & Limitations Card ── */
+const ScopeLimitationsCard: React.FC = () => (
+    <article className={styles.card}>
+        <div className={styles.cardHeader}>
+            <div>
+                <h2 className={styles.cardTitle}>Scan Scope &amp; Limitations</h2>
+                <p className={styles.cardSubtitle}>What this scan does and does not check</p>
+            </div>
+        </div>
+        <div className={styles.cardBody}>
+            <div className={styles.scopeSection}>
+                <h3 className={styles.scopeTitle}>What this scan checks</h3>
+                <ul className={styles.scopeList}>
+                    <li>SharePoint groups for the current site</li>
+                    <li>Basic external user patterns in group membership</li>
+                    <li>Document library permission inheritance</li>
+                    <li>Current site context and user permissions</li>
+                </ul>
+            </div>
+            <div className={styles.scopeSection}>
+                <h3 className={styles.scopeTitle}>What this scan does not fully check</h3>
+                <ul className={styles.scopeList}>
+                    <li>Tenant-wide sharing policies</li>
+                    <li>Microsoft Purview alerts or DLP policies</li>
+                    <li>All item-level permissions</li>
+                    <li>Anonymous sharing links</li>
+                    <li>Historical sharing events or audit logs</li>
+                    <li>Sensitivity labels</li>
+                </ul>
+            </div>
+            <p className={styles.scopeNote}>
+                This public MVP provides site-level indicators only. For a full governance review,
+                validate results with the SharePoint admin center, Microsoft Purview, audit logs,
+                and tenant-level sharing settings.
+            </p>
+        </div>
+    </article>
+);
+
+/* ── Groups Table ── */
 interface IGroupsTableProps {
     groups: IGroupSummary[];
 }
 
 const GroupsTable: React.FC<IGroupsTableProps> = ({ groups }) => {
-    const getStatus = (g: IGroupSummary): { text: string; cls: string } => {
+    const getStatus = (g: IGroupSummary): { text: string; cls: string; note: string } => {
         if (g.possibleExternalUserCount && g.possibleExternalUserCount > 0) {
-            return { text: 'Review', cls: styles.statusReview };
+            return { text: 'External detected', cls: styles.statusReview, note: 'Review recommended' };
         }
         if (g.isEmpty) {
-            return { text: 'Empty', cls: styles.statusOk };
+            return { text: 'Empty', cls: styles.statusEmpty, note: 'No members found' };
         }
-        return { text: 'OK', cls: styles.statusOk };
+        return { text: 'Internal only', cls: styles.statusOk, note: '' };
     };
+
+    const hasEmptyGroups = groups.filter((g) => g.isEmpty).length > 0;
 
     return (
         <article className={styles.card}>
@@ -453,6 +645,12 @@ const GroupsTable: React.FC<IGroupsTableProps> = ({ groups }) => {
                 </div>
             </div>
             <div className={styles.cardBody}>
+                {hasEmptyGroups && (
+                    <div className={styles.permissionSummary}>
+                        Several SharePoint groups are empty. This may be expected in a new or test site,
+                        but in production it can indicate stale or incomplete permission configuration.
+                    </div>
+                )}
                 <div className={styles.tableWrap}>
                     <table className={styles.dataTable}>
                         <thead>
@@ -461,6 +659,7 @@ const GroupsTable: React.FC<IGroupsTableProps> = ({ groups }) => {
                                 <th>Members</th>
                                 <th>Possible external</th>
                                 <th>Status</th>
+                                <th>Notes</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -472,11 +671,12 @@ const GroupsTable: React.FC<IGroupsTableProps> = ({ groups }) => {
                                         <td>{g.userCount ?? '–'}</td>
                                         <td>{g.possibleExternalUserCount ?? '–'}</td>
                                         <td><span className={st.cls}>{st.text}</span></td>
+                                        <td style={{ color: '#605e5c', fontSize: 12 }}>{st.note || (g.notes ? g.notes.join('; ') : '—')}</td>
                                     </tr>
                                 );
                             })}
                             {groups.length === 0 && (
-                                <tr><td colSpan={4} style={{ textAlign: 'center', color: '#6b7280' }}>No groups found</td></tr>
+                                <tr><td colSpan={5} style={{ textAlign: 'center', color: '#a19f9d', padding: 24 }}>No groups found</td></tr>
                             )}
                         </tbody>
                     </table>
@@ -486,49 +686,64 @@ const GroupsTable: React.FC<IGroupsTableProps> = ({ groups }) => {
     );
 };
 
-interface IPermissionsTableProps {
+/* ── Permissions Card ── */
+interface IPermissionsCardProps {
     indicators: IPermissionIndicator[];
 }
 
-const PermissionsTable: React.FC<IPermissionsTableProps> = ({ indicators }) => (
-    <article className={styles.card}>
-        <div className={styles.cardHeader}>
-            <div>
-                <h2 className={styles.cardTitle}>Permission Inheritance</h2>
-                <p className={styles.cardSubtitle}>Document library inheritance status</p>
+const PermissionsCard: React.FC<IPermissionsCardProps> = ({ indicators }) => {
+    const uniqueCount = indicators.filter((p) => p.hasUniquePermissions).length;
+
+    return (
+        <article className={styles.card}>
+            <div className={styles.cardHeader}>
+                <div>
+                    <h2 className={styles.cardTitle}>Permission Inheritance</h2>
+                    <p className={styles.cardSubtitle}>Document library inheritance status</p>
+                </div>
             </div>
-        </div>
-        <div className={styles.cardBody}>
-            <div className={styles.tableWrap}>
-                <table className={styles.dataTable}>
-                    <thead>
-                        <tr>
-                            <th>Library</th>
-                            <th>Inheritance</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {indicators.map((ind, i) => (
-                            <tr key={i}>
-                                <td>{ind.title}</td>
-                                <td>{ind.hasUniquePermissions ? 'Broken' : 'Inherited'}</td>
-                                <td>
-                                    <span className={ind.status === 'Ok' ? styles.statusOk : styles.statusReview}>
-                                        {ind.status === 'Ok' ? 'OK' : 'Review needed'}
-                                    </span>
-                                </td>
+            <div className={styles.cardBody}>
+                <div className={styles.permissionSummary}>
+                    <span><span className={styles.permStatNumber}>{indicators.length}</span> libraries reviewed</span>
+                    <span><span className={styles.permStatNumber}>{uniqueCount}</span> with unique permissions</span>
+                </div>
+                <div className={styles.tableWrap}>
+                    <table className={styles.dataTable}>
+                        <thead>
+                            <tr>
+                                <th>Library</th>
+                                <th>Inheritance</th>
+                                <th>Status</th>
                             </tr>
-                        ))}
-                        {indicators.length === 0 && (
-                            <tr><td colSpan={3} style={{ textAlign: 'center', color: '#6b7280' }}>No libraries found</td></tr>
-                        )}
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody>
+                            {indicators.map((ind, i) => (
+                                <tr key={i}>
+                                    <td>{ind.title}</td>
+                                    <td>{ind.hasUniquePermissions ? 'Unique' : 'Inherited'}</td>
+                                    <td>
+                                        <span className={ind.hasUniquePermissions ? styles.statusReview : styles.statusOk}>
+                                            {ind.hasUniquePermissions ? '⚠ Review needed' : '✓ OK'}
+                                        </span>
+                                    </td>
+                                </tr>
+                            ))}
+                            {indicators.length === 0 && (
+                                <tr><td colSpan={3} style={{ textAlign: 'center', color: '#a19f9d', padding: 24 }}>No libraries found</td></tr>
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+                {uniqueCount > 0 && (
+                    <p className={styles.permissionNote}>
+                        Unique permissions are not automatically bad, but they should be reviewed because they can
+                        increase governance complexity.
+                    </p>
+                )}
             </div>
-        </div>
-    </article>
-);
+        </article>
+    );
+};
 
 export { ExternalSharingRiskScanner };
 export default ExternalSharingRiskScanner;

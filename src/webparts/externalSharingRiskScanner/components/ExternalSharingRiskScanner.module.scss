@@ -1,65 +1,64 @@
-// Converted from external-sharing-risk-scanner-layout.html reference
+// SPFx External Sharing Risk Scanner — Microsoft 365 Governance Dashboard Style
 // All layout properties use !important to override SharePoint page CSS
 
 .externalSharingRiskScanner {
     width: 100% !important;
     padding: 24px !important;
-    background: #f6f8fb !important;
-    color: #1f2937 !important;
-    font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, Arial, sans-serif !important;
+    background: #faf9f8 !important;
+    color: #323130 !important;
+    font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, sans-serif !important;
     font-size: 14px !important;
-    line-height: 1.45 !important;
+    line-height: 1.5 !important;
 
     * {
         box-sizing: border-box !important;
     }
 
-    // ── Shell (max-width wrapper) ──
+    // ── Shell ──
     .shell {
         width: 100% !important;
-        max-width: 1180px !important;
+        max-width: 1200px !important;
         margin: 0 auto !important;
     }
 
-    // ── Header ──
+    // ── Header / Command Bar ──
     .header {
         display: flex !important;
         align-items: flex-start !important;
         justify-content: space-between !important;
         gap: 24px !important;
-        padding: 24px !important;
-        margin-bottom: 16px !important;
-        background: linear-gradient(135deg, #ffffff 0%, #f5f3ff 100%) !important;
-        border: 1px solid #e5e7eb !important;
-        border-radius: 12px !important;
-        box-shadow: 0 1px 2px rgba(16, 24, 40, 0.06), 0 1px 3px rgba(16, 24, 40, 0.1) !important;
+        padding: 20px 24px !important;
+        margin-bottom: 20px !important;
+        background: #ffffff !important;
+        border: 1px solid #edebe9 !important;
+        border-radius: 4px !important;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05) !important;
     }
 
-    .kicker {
-        display: inline-flex !important;
-        align-items: center !important;
-        gap: 6px !important;
-        margin-bottom: 8px !important;
-        color: #6b46c1 !important;
-        font-size: 12px !important;
-        font-weight: 700 !important;
-        letter-spacing: 0.03em !important;
-        text-transform: uppercase !important;
+    .headerLeft {
+        flex: 1 !important;
+        min-width: 0 !important;
     }
 
     .title {
-        margin: 0 0 8px 0 !important;
-        color: #1f2937 !important;
-        font-size: 26px !important;
-        font-weight: 700 !important;
-        line-height: 1.2 !important;
+        margin: 0 0 6px 0 !important;
+        color: #323130 !important;
+        font-size: 24px !important;
+        font-weight: 600 !important;
+        line-height: 1.25 !important;
     }
 
     .description {
-        max-width: 760px !important;
-        margin: 0 !important;
-        color: #6b7280 !important;
+        max-width: 720px !important;
+        margin: 0 0 8px 0 !important;
+        color: #605e5c !important;
         font-size: 14px !important;
+    }
+
+    .timestamp {
+        margin: 0 !important;
+        color: #a19f9d !important;
+        font-size: 12px !important;
     }
 
     .headerActions {
@@ -67,6 +66,7 @@
         align-items: center !important;
         gap: 10px !important;
         flex-shrink: 0 !important;
+        padding-top: 4px !important;
     }
 
     // ── Buttons ──
@@ -74,13 +74,13 @@
         display: inline-flex !important;
         align-items: center !important;
         justify-content: center !important;
-        gap: 8px !important;
-        min-height: 36px !important;
-        padding: 8px 14px !important;
+        gap: 6px !important;
+        min-height: 32px !important;
+        padding: 6px 16px !important;
         border: 1px solid transparent !important;
-        border-radius: 8px !important;
+        border-radius: 2px !important;
         font-weight: 600 !important;
-        font-size: 13px !important;
+        font-size: 14px !important;
         cursor: pointer !important;
         text-decoration: none !important;
         white-space: nowrap !important;
@@ -88,20 +88,27 @@
 
     .buttonPrimary {
         color: #ffffff !important;
-        background: #6b46c1 !important;
+        background: #0078d4 !important;
+        border-color: #0078d4 !important;
 
         &:hover {
-            background: #553c9a !important;
+            background: #106ebe !important;
+        }
+
+        &:disabled {
+            background: #c8c6c4 !important;
+            border-color: #c8c6c4 !important;
+            cursor: not-allowed !important;
         }
     }
 
     .buttonSecondary {
-        color: #1f2937 !important;
+        color: #323130 !important;
         background: #ffffff !important;
-        border-color: #d1d5db !important;
+        border-color: #8a8886 !important;
 
         &:hover {
-            background: #f8fafc !important;
+            background: #f3f2f1 !important;
         }
     }
 
@@ -110,51 +117,97 @@
         display: flex !important;
         align-items: flex-start !important;
         gap: 10px !important;
-        padding: 12px 14px !important;
+        padding: 12px 16px !important;
         margin-bottom: 16px !important;
-        border-radius: 8px !important;
-        border: 1px solid transparent !important;
-        font-size: 13px !important;
+        border-radius: 2px !important;
+        border-left: 4px solid transparent !important;
+        font-size: 14px !important;
     }
 
     .alertWarning {
         background: #fff4ce !important;
-        border-color: #f7d781 !important;
-        color: #5c3b00 !important;
+        border-left-color: #ffb900 !important;
+        color: #323130 !important;
     }
 
     .alertInfo {
-        background: #eff6ff !important;
-        border-color: #bfdbfe !important;
-        color: #1e3a8a !important;
+        background: #f3f2f1 !important;
+        border-left-color: #0078d4 !important;
+        color: #323130 !important;
     }
 
     .alertIcon {
-        width: 18px !important;
-        height: 18px !important;
-        margin-top: 1px !important;
         flex: 0 0 auto !important;
-        font-size: 14px !important;
+        font-size: 16px !important;
+        line-height: 1 !important;
     }
 
-    // ── Overview Grid (Risk Score left + Scan Summary right) ──
-    .overviewGrid {
+    // ── Metric Cards Row ──
+    .metricsRow {
         display: grid !important;
-        grid-template-columns: minmax(260px, 340px) 1fr !important;
+        grid-template-columns: repeat(4, 1fr) !important;
         gap: 16px !important;
-        margin-bottom: 16px !important;
+        margin-bottom: 20px !important;
 
-        @media (max-width: 1024px) {
+        @media (max-width: 900px) {
+            grid-template-columns: repeat(2, 1fr) !important;
+        }
+
+        @media (max-width: 540px) {
             grid-template-columns: 1fr !important;
         }
+    }
+
+    .metricCard {
+        display: flex !important;
+        flex-direction: column !important;
+        padding: 16px 20px !important;
+        background: #ffffff !important;
+        border: 1px solid #edebe9 !important;
+        border-radius: 4px !important;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05) !important;
+    }
+
+    .metricCardHeader {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        margin-bottom: 10px !important;
+    }
+
+    .metricTitle {
+        margin: 0 !important;
+        color: #605e5c !important;
+        font-size: 12px !important;
+        font-weight: 600 !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.04em !important;
+    }
+
+    .metricIcon {
+        font-size: 16px !important;
+    }
+
+    .metricValue {
+        margin: 0 !important;
+        font-size: 32px !important;
+        font-weight: 600 !important;
+        color: #323130 !important;
+        line-height: 1.1 !important;
+    }
+
+    .metricStatus {
+        margin: 6px 0 0 0 !important;
+        font-size: 13px !important;
+        color: #605e5c !important;
     }
 
     // ── Card ──
     .card {
         background: #ffffff !important;
-        border: 1px solid #e5e7eb !important;
-        border-radius: 12px !important;
-        box-shadow: 0 1px 2px rgba(16, 24, 40, 0.06), 0 1px 3px rgba(16, 24, 40, 0.1) !important;
+        border: 1px solid #edebe9 !important;
+        border-radius: 4px !important;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05) !important;
         overflow: hidden !important;
     }
 
@@ -163,51 +216,60 @@
         align-items: flex-start !important;
         justify-content: space-between !important;
         gap: 16px !important;
-        padding: 18px 20px 12px 20px !important;
-        border-bottom: 1px solid #e5e7eb !important;
+        padding: 16px 20px !important;
+        border-bottom: 1px solid #edebe9 !important;
     }
 
     .cardTitle {
         margin: 0 !important;
         font-size: 16px !important;
-        font-weight: 700 !important;
-        color: #1f2937 !important;
+        font-weight: 600 !important;
+        color: #323130 !important;
     }
 
     .cardSubtitle {
-        margin: 4px 0 0 0 !important;
-        color: #6b7280 !important;
+        margin: 2px 0 0 0 !important;
+        color: #a19f9d !important;
         font-size: 12px !important;
     }
 
     .cardBody {
-        padding: 18px 20px 20px 20px !important;
+        padding: 20px !important;
     }
 
-    // ── Risk Score Card ──
-    .riskScoreCard {
+    // ── Risk Score Section ──
+    .riskScoreSection {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr !important;
+        gap: 16px !important;
+        margin-bottom: 20px !important;
+
+        @media (max-width: 768px) {
+            grid-template-columns: 1fr !important;
+        }
+    }
+
+    .riskScoreVisual {
         display: flex !important;
-        flex-direction: column !important;
-        align-items: center !important;
-        text-align: center !important;
+        align-items: flex-start !important;
+        gap: 24px !important;
+        width: 100% !important;
     }
 
     .riskRing {
         position: relative !important;
-        width: 152px !important;
-        height: 152px !important;
-        margin: 8px auto 16px auto !important;
+        width: 120px !important;
+        height: 120px !important;
+        flex-shrink: 0 !important;
         border-radius: 50% !important;
-        // conic-gradient set via inline style (dynamic angle)
     }
 
     .riskRingInner {
-        content: '' !important;
         position: absolute !important;
-        top: 14px !important;
-        left: 14px !important;
-        right: 14px !important;
-        bottom: 14px !important;
+        top: 12px !important;
+        left: 12px !important;
+        right: 12px !important;
+        bottom: 12px !important;
         border-radius: 50% !important;
         background: #ffffff !important;
     }
@@ -223,37 +285,72 @@
     }
 
     .riskNumber {
-        font-size: 36px !important;
-        font-weight: 800 !important;
+        font-size: 28px !important;
+        font-weight: 700 !important;
         line-height: 1 !important;
     }
 
-    .riskLabel {
-        margin-top: 6px !important;
-        color: #6b7280 !important;
-        font-size: 12px !important;
+    .riskSubLabel {
+        margin-top: 2px !important;
+        color: #a19f9d !important;
+        font-size: 11px !important;
         font-weight: 600 !important;
+    }
+
+    .riskDetails {
+        flex: 1 !important;
+        text-align: left !important;
+        min-width: 0 !important;
+    }
+
+    .riskSummary {
+        margin: 0 0 12px 0 !important;
+        color: #605e5c !important;
+        font-size: 14px !important;
+        line-height: 1.5 !important;
+    }
+
+    .riskFactors {
+        margin: 0 !important;
+        padding: 0 0 0 18px !important;
+        color: #605e5c !important;
+        font-size: 13px !important;
+        line-height: 1.8 !important;
+    }
+
+    .riskBar {
+        width: 100% !important;
+        height: 6px !important;
+        background: #f3f2f1 !important;
+        border-radius: 3px !important;
+        overflow: hidden !important;
+        margin-top: 16px !important;
+    }
+
+    .riskBarFill {
+        height: 100% !important;
+        border-radius: 3px !important;
+        transition: width 0.3s ease !important;
     }
 
     // ── Badges ──
     .badge {
         display: inline-flex !important;
         align-items: center !important;
-        gap: 6px !important;
-        padding: 4px 9px !important;
-        border-radius: 999px !important;
+        padding: 2px 8px !important;
+        border-radius: 2px !important;
         font-size: 12px !important;
-        font-weight: 700 !important;
+        font-weight: 600 !important;
         white-space: nowrap !important;
     }
 
     .badgeSuccess {
         color: #107c10 !important;
-        background: #ecfdf3 !important;
+        background: #dff6dd !important;
     }
 
     .badgeWarning {
-        color: #ca5010 !important;
+        color: #835b00 !important;
         background: #fff4ce !important;
     }
 
@@ -263,183 +360,149 @@
     }
 
     .badgeInfo {
-        color: #2563eb !important;
-        background: #eff6ff !important;
+        color: #004578 !important;
+        background: #deecf9 !important;
     }
 
-    // ── Summary text + meta list (inside Risk Score card) ──
-    .summaryText {
-        margin: 0 0 14px 0 !important;
-        color: #6b7280 !important;
-        font-size: 13px !important;
-        text-align: left !important;
+    .badgeNeutral {
+        color: #605e5c !important;
+        background: #f3f2f1 !important;
     }
 
-    .metaList {
+    // ── Key Findings ──
+    .findingsList {
         display: grid !important;
-        gap: 0 !important;
-        width: 100% !important;
-        margin: 0 !important;
-        padding: 0 !important;
-        list-style: none !important;
-        text-align: left !important;
+        gap: 8px !important;
     }
 
-    .metaItem {
+    .finding {
         display: flex !important;
-        justify-content: space-between !important;
+        align-items: flex-start !important;
         gap: 12px !important;
-        padding: 9px 0 !important;
-        border-bottom: 1px solid #e5e7eb !important;
-
-        &:last-child {
-            border-bottom: 0 !important;
-        }
+        padding: 12px 16px !important;
+        border-radius: 2px !important;
+        border: 1px solid #edebe9 !important;
+        background: #ffffff !important;
     }
 
-    .metaLabel {
-        color: #6b7280 !important;
-        font-size: 13px !important;
+    .findingSuccess {
+        border-left: 3px solid #107c10 !important;
     }
 
-    .metaValue {
-        color: #1f2937 !important;
+    .findingWarning {
+        border-left: 3px solid #ffb900 !important;
+    }
+
+    .findingInfo {
+        border-left: 3px solid #0078d4 !important;
+    }
+
+    .findingDanger {
+        border-left: 3px solid #d13438 !important;
+    }
+
+    .findingIcon {
+        width: 24px !important;
+        height: 24px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        border-radius: 50% !important;
+        font-size: 12px !important;
         font-weight: 700 !important;
-        text-align: right !important;
+        flex-shrink: 0 !important;
+    }
+
+    .findingIconSuccess {
+        background: #dff6dd !important;
+        color: #107c10 !important;
+    }
+
+    .findingIconWarning {
+        background: #fff4ce !important;
+        color: #835b00 !important;
+    }
+
+    .findingIconInfo {
+        background: #deecf9 !important;
+        color: #004578 !important;
+    }
+
+    .findingIconDanger {
+        background: #fde7e9 !important;
+        color: #a4262c !important;
+    }
+
+    .findingBody {
+        flex: 1 !important;
+        min-width: 0 !important;
+    }
+
+    .findingTitle {
+        margin: 0 !important;
+        color: #323130 !important;
+        font-weight: 600 !important;
+        font-size: 14px !important;
+    }
+
+    .findingDescription {
+        margin: 2px 0 0 0 !important;
+        color: #605e5c !important;
         font-size: 13px !important;
     }
 
-    // ── Metrics Grid (inside Scan Summary card) ──
-    .metricsGrid {
+    // ── Two-Column Grid ──
+    .twoColumnGrid {
         display: grid !important;
-        grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
-        gap: 12px !important;
+        grid-template-columns: 1fr 1fr !important;
+        gap: 16px !important;
+        margin-bottom: 20px !important;
 
-        @media (max-width: 1024px) {
-            grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        @media (max-width: 900px) {
+            grid-template-columns: 1fr !important;
         }
+    }
+
+    // ── Section spacing ──
+    .sectionSpacing {
+        margin-bottom: 20px !important;
+    }
+
+    // ── Site Summary ──
+    .summaryGrid {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr !important;
+        gap: 0 24px !important;
 
         @media (max-width: 640px) {
             grid-template-columns: 1fr !important;
         }
     }
 
-    .metricCard {
-        padding: 16px !important;
-        background: #f8fafc !important;
-        border: 1px solid #e5e7eb !important;
-        border-radius: 8px !important;
-    }
-
-    .metricIcon {
-        width: 32px !important;
-        height: 32px !important;
+    .summaryRow {
         display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-        margin-bottom: 10px !important;
-        border-radius: 9px !important;
-        background: #ffffff !important;
-        border: 1px solid #e5e7eb !important;
-        font-size: 16px !important;
-    }
-
-    .metricValue {
-        margin: 0 !important;
-        font-size: 24px !important;
-        font-weight: 800 !important;
-        line-height: 1.1 !important;
-        color: #1f2937 !important;
-    }
-
-    .metricLabel {
-        margin: 4px 0 0 0 !important;
-        color: #6b7280 !important;
-        font-size: 12px !important;
-        font-weight: 600 !important;
-    }
-
-    .metricNote {
-        margin: 8px 0 0 0 !important;
-        color: #9ca3af !important;
-        font-size: 12px !important;
-    }
-
-    // ── Section Grid (full-width sections) ──
-    .sectionGrid {
-        display: grid !important;
-        grid-template-columns: 1fr !important;
-        gap: 16px !important;
-    }
-
-    // ── Findings List ──
-    .findingsList {
-        display: grid !important;
-        gap: 10px !important;
-    }
-
-    .finding {
-        display: grid !important;
-        grid-template-columns: 34px 1fr auto !important;
-        align-items: center !important;
+        justify-content: space-between !important;
         gap: 12px !important;
-        padding: 13px 14px !important;
-        border-radius: 8px !important;
-        border: 1px solid #e5e7eb !important;
-        background: #ffffff !important;
-    }
+        padding: 10px 0 !important;
+        border-bottom: 1px solid #f3f2f1 !important;
 
-    .findingSuccess {
-        border-left: 4px solid #107c10 !important;
-    }
-
-    .findingWarning {
-        border-left: 4px solid #ca5010 !important;
-    }
-
-    .findingInfo {
-        border-left: 4px solid #2563eb !important;
-    }
-
-    .findingDanger {
-        border-left: 4px solid #a4262c !important;
-    }
-
-    .findingIcon {
-        width: 28px !important;
-        height: 28px !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-        border-radius: 50% !important;
-        background: #f8fafc !important;
-        font-size: 14px !important;
-        font-weight: 700 !important;
-    }
-
-    .findingTitle {
-        margin: 0 !important;
-        color: #1f2937 !important;
-        font-weight: 700 !important;
-        font-size: 13px !important;
-    }
-
-    .findingDescription {
-        margin: 3px 0 0 0 !important;
-        color: #6b7280 !important;
-        font-size: 12px !important;
-    }
-
-    // ── Two-Column Grid (Groups + Permissions) ──
-    .twoColumnGrid {
-        display: grid !important;
-        grid-template-columns: 1fr 1fr !important;
-        gap: 16px !important;
-        margin-top: 16px !important;
-
-        @media (max-width: 1024px) {
-            grid-template-columns: 1fr !important;
+        &:last-child {
+            border-bottom: 0 !important;
         }
+    }
+
+    .summaryLabel {
+        color: #605e5c !important;
+        font-size: 13px !important;
+        white-space: nowrap !important;
+    }
+
+    .summaryValue {
+        color: #323130 !important;
+        font-weight: 600 !important;
+        font-size: 13px !important;
+        text-align: right !important;
+        word-break: break-all !important;
     }
 
     // ── Tables ──
@@ -454,20 +517,20 @@
     }
 
     .dataTable th {
-        padding: 11px 12px !important;
-        background: #f8fafc !important;
-        color: #6b7280 !important;
-        border-bottom: 1px solid #e5e7eb !important;
+        padding: 10px 12px !important;
+        background: #faf9f8 !important;
+        color: #605e5c !important;
+        border-bottom: 1px solid #edebe9 !important;
         font-size: 12px !important;
-        font-weight: 700 !important;
+        font-weight: 600 !important;
         text-align: left !important;
         white-space: nowrap !important;
     }
 
     .dataTable td {
-        padding: 12px !important;
-        border-bottom: 1px solid #e5e7eb !important;
-        color: #1f2937 !important;
+        padding: 10px 12px !important;
+        border-bottom: 1px solid #f3f2f1 !important;
+        color: #323130 !important;
         vertical-align: top !important;
     }
 
@@ -475,20 +538,59 @@
         border-bottom: 0 !important;
     }
 
+    .dataTable tr:hover td {
+        background: #faf9f8 !important;
+    }
+
     .statusOk {
         color: #107c10 !important;
-        font-weight: 700 !important;
+        font-weight: 600 !important;
+        font-size: 12px !important;
     }
 
     .statusReview {
-        color: #ca5010 !important;
+        color: #d83b01 !important;
+        font-weight: 600 !important;
+        font-size: 12px !important;
+    }
+
+    .statusEmpty {
+        color: #a19f9d !important;
+        font-weight: 600 !important;
+        font-size: 12px !important;
+    }
+
+    // ── Permission summary bar ──
+    .permissionSummary {
+        display: flex !important;
+        gap: 16px !important;
+        margin-bottom: 16px !important;
+        padding: 12px 16px !important;
+        background: #faf9f8 !important;
+        border-radius: 2px !important;
+        font-size: 13px !important;
+        color: #605e5c !important;
+    }
+
+    .permStatNumber {
         font-weight: 700 !important;
+        color: #323130 !important;
+    }
+
+    .permissionNote {
+        margin: 16px 0 0 0 !important;
+        padding: 12px 16px !important;
+        background: #faf9f8 !important;
+        border-left: 3px solid #0078d4 !important;
+        color: #605e5c !important;
+        font-size: 13px !important;
+        font-style: italic !important;
     }
 
     // ── Recommended Actions ──
     .actionsList {
         display: grid !important;
-        gap: 10px !important;
+        gap: 12px !important;
         margin: 0 !important;
         padding: 0 !important;
         list-style: none !important;
@@ -496,58 +598,156 @@
 
     .actionItem {
         display: grid !important;
-        grid-template-columns: 28px 1fr !important;
-        gap: 12px !important;
-        padding: 13px 14px !important;
-        border-radius: 8px !important;
-        background: #f8fafc !important;
-        border: 1px solid #e5e7eb !important;
+        grid-template-columns: auto 1fr !important;
+        gap: 16px !important;
+        padding: 16px !important;
+        border-radius: 2px !important;
+        background: #faf9f8 !important;
+        border: 1px solid #edebe9 !important;
     }
 
-    .actionNumber {
+    .actionPriority {
         display: flex !important;
-        width: 28px !important;
-        height: 28px !important;
         align-items: center !important;
         justify-content: center !important;
-        border-radius: 50% !important;
-        background: #6b46c1 !important;
-        color: #ffffff !important;
-        font-size: 12px !important;
-        font-weight: 800 !important;
+        min-width: 64px !important;
+        height: 24px !important;
+        border-radius: 2px !important;
+        font-size: 11px !important;
+        font-weight: 700 !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.04em !important;
+        align-self: start !important;
+    }
+
+    .priorityHigh {
+        color: #a4262c !important;
+        background: #fde7e9 !important;
+    }
+
+    .priorityMedium {
+        color: #835b00 !important;
+        background: #fff4ce !important;
+    }
+
+    .priorityLow {
+        color: #004578 !important;
+        background: #deecf9 !important;
+    }
+
+    .actionBody {
+        min-width: 0 !important;
     }
 
     .actionTitle {
         margin: 0 !important;
-        color: #1f2937 !important;
-        font-weight: 700 !important;
+        color: #323130 !important;
+        font-weight: 600 !important;
+        font-size: 14px !important;
+    }
+
+    .actionReason {
+        margin: 4px 0 0 0 !important;
+        color: #605e5c !important;
         font-size: 13px !important;
     }
 
-    .actionDescription {
-        margin: 3px 0 0 0 !important;
-        color: #6b7280 !important;
+    .actionOwner {
+        margin: 4px 0 0 0 !important;
+        color: #a19f9d !important;
         font-size: 12px !important;
     }
 
-    // ── Footer Note ──
-    .footerNote {
-        margin-top: 16px !important;
-        padding: 14px 16px !important;
-        color: #6b7280 !important;
+    // ── Scope / Limitations Panel ──
+    .scopeSection {
+        margin-bottom: 16px !important;
+
+        &:last-child {
+            margin-bottom: 0 !important;
+        }
+    }
+
+    .scopeTitle {
+        margin: 0 0 8px 0 !important;
+        color: #323130 !important;
+        font-size: 14px !important;
+        font-weight: 600 !important;
+    }
+
+    .scopeList {
+        margin: 0 !important;
+        padding: 0 0 0 20px !important;
+        color: #605e5c !important;
+        font-size: 13px !important;
+        line-height: 1.8 !important;
+    }
+
+    .scopeNote {
+        margin: 12px 0 0 0 !important;
+        padding: 12px 16px !important;
+        background: #faf9f8 !important;
+        border-left: 3px solid #0078d4 !important;
+        color: #605e5c !important;
+        font-size: 13px !important;
+        font-style: italic !important;
+    }
+
+    // ── Footer ──
+    .footer {
+        margin-top: 20px !important;
+        padding: 16px 20px !important;
+        color: #a19f9d !important;
         background: #ffffff !important;
-        border: 1px solid #e5e7eb !important;
-        border-radius: 12px !important;
+        border: 1px solid #edebe9 !important;
+        border-radius: 4px !important;
         font-size: 12px !important;
+        text-align: center !important;
+    }
+
+    .footerLink {
+        color: #0078d4 !important;
+        text-decoration: none !important;
+
+        &:hover {
+            text-decoration: underline !important;
+        }
+    }
+
+    // ── Collapsible ──
+    .collapseToggle {
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 6px !important;
+        padding: 0 !important;
+        border: none !important;
+        background: none !important;
+        color: #0078d4 !important;
+        font-size: 13px !important;
+        font-weight: 600 !important;
+        cursor: pointer !important;
+
+        &:hover {
+            text-decoration: underline !important;
+        }
+    }
+
+    .collapseArrow {
+        display: inline-block !important;
+        transition: transform 0.15s ease !important;
+        font-size: 10px !important;
+    }
+
+    .collapseArrowOpen {
+        transform: rotate(90deg) !important;
     }
 
     // ── Responsive: Mobile ──
-    @media (max-width: 640px) {
+    @media (max-width: 540px) {
         padding: 12px !important;
 
         .header {
             flex-direction: column !important;
-            padding: 18px !important;
+            padding: 16px !important;
         }
 
         .headerActions {
@@ -561,11 +761,16 @@
         }
 
         .title {
-            font-size: 22px !important;
+            font-size: 20px !important;
         }
 
-        .finding {
-            grid-template-columns: 34px 1fr !important;
+        .riskScoreVisual {
+            flex-direction: column !important;
+            align-items: center !important;
+        }
+
+        .riskDetails {
+            text-align: center !important;
         }
     }
 }
