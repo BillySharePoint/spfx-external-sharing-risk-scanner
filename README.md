@@ -27,19 +27,7 @@ The SPFx External Sharing Risk Scanner provides a lightweight dashboard that hel
 
 ## Screenshot
 
-Add a screenshot of the working web part here after uploading it to the repository.
-
-Recommended path:
-
-```txt
-/assets/screenshots/external-sharing-risk-scanner-dashboard.png
-```
-
-Example Markdown:
-
-```md
 ![SPFx External Sharing Risk Scanner dashboard](./assets/screenshots/external-sharing-risk-scanner-dashboard.png)
-```
 
 ---
 
