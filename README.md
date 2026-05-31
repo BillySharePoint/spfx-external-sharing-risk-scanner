@@ -1,11 +1,36 @@
 # SPFx External Sharing Risk Scanner
 
+![SPFx](https://img.shields.io/badge/SPFx-1.22.x-blue)
+![SharePoint Online](https://img.shields.io/badge/SharePoint-Online-blue)
+![Microsoft 365](https://img.shields.io/badge/Microsoft%20365-Governance-blue)
+![License: MIT](https://img.shields.io/badge/License-MIT-green)
+
 An open-source SharePoint Framework web part for reviewing external sharing, SharePoint group membership, permission inheritance, and governance risk indicators in SharePoint Online.
 
 This project is designed to help SharePoint site owners, Microsoft 365 admins, consultants, and developers quickly surface common permission and external sharing risks directly from a SharePoint site.
 
-> Need a more advanced version or help adapting this for your tenant?  
+> Need a more advanced version or help adapting this for your tenant?
 > Contact me: https://www.billyperalta.com/contact
+
+---
+
+## Screenshot
+
+![SPFx External Sharing Risk Scanner dashboard](./assets/screenshots/external-sharing-risk-scanner-dashboard.png)
+
+---
+
+## Current MVP Status
+
+The public MVP is working and includes the initial dashboard experience for site-level permission and sharing review.
+
+Current focus:
+
+- Improving scan accuracy
+- Improving external user detection configuration
+- Expanding permission inheritance checks
+- Improving documentation and test scenarios
+- Preparing better demo screenshots and usage examples
 
 ---
 
@@ -22,12 +47,6 @@ Many organizations do not struggle because external sharing exists. They struggl
 - Does this site need a governance review before migration, Copilot rollout, or broader content modernization?
 
 The SPFx External Sharing Risk Scanner provides a lightweight dashboard that helps start those conversations.
-
----
-
-## Screenshot
-
-![SPFx External Sharing Risk Scanner dashboard](./assets/screenshots/external-sharing-risk-scanner-dashboard.png)
 
 ---
 
@@ -72,6 +91,10 @@ Highlights libraries that may require additional review because unique permissio
 ### Recommended Actions
 
 Provides practical next steps based on scan findings, such as reviewing empty SharePoint groups, checking libraries with unique permissions, and validating sharing settings with Microsoft 365 admins.
+
+### Copilot Readiness
+
+Helps organizations preparing for Microsoft 365 Copilot understand whether unclear permissions or oversharing may create content exposure concerns.
 
 ---
 
@@ -186,19 +209,39 @@ Run the local development server:
 gulp serve
 ```
 
-Bundle the solution:
+---
+
+## Deployment
+
+To deploy the web part to SharePoint Online:
+
+1. Run a production bundle:
 
 ```bash
 gulp bundle --ship
 ```
 
-Package the solution:
+2. Package the solution:
 
 ```bash
 gulp package-solution --ship
 ```
 
-Deploy the generated `.sppkg` file from the `sharepoint/solution` folder to the SharePoint App Catalog.
+3. Locate the generated `.sppkg` file in:
+
+```txt
+sharepoint/solution
+```
+
+4. Upload the `.sppkg` file to your SharePoint App Catalog.
+
+5. If prompted, approve any required API permissions in the SharePoint Admin Center.
+
+6. Add the app to the target SharePoint site.
+
+7. Edit a modern SharePoint page and add the External Sharing Risk Scanner web part.
+
+8. Configure internal domains in the web part properties if your environment requires more accurate external user detection.
 
 ---
 
@@ -229,7 +272,7 @@ Before deploying this solution:
 
 - Review all requested API permissions
 - Test in a development tenant first
-- Confirm the solution matches your organization’s governance policies
+- Confirm the solution matches your organization's governance policies
 - Avoid granting broad tenant-wide permissions unless required and approved
 - Validate scan results against known SharePoint permission scenarios
 - Do not expose sensitive permission data to users who should not see it
@@ -256,30 +299,9 @@ Known limitations may include:
 
 A private Pro version of this project may be available for organizations, consultants, or teams that need advanced implementation examples or tenant-specific customization.
 
-The Pro version can include:
-
-- Advanced external sharing risk scoring
-- CSV export
-- Extended Microsoft Graph examples
-- Additional SharePoint permission checks
-- Additional sharing link checks
-- Tenant-specific configuration patterns
-- Deployment notes
-- Governance checklist
-- Troubleshooting guidance
-- Early access improvements
-- Implementation guidance for real Microsoft 365 environments
-
 If you are interested in the Pro version or need help adapting this project for your Microsoft 365 tenant, please contact me:
 
 https://www.billyperalta.com/contact
-
-Please include:
-
-- Your name
-- Organization or project context
-- What SharePoint/Microsoft 365 problem you are trying to solve
-- Your GitHub username, if requesting private repository access
 
 ---
 
@@ -342,5 +364,5 @@ Created by Billy Peralta.
 
 I build practical SharePoint, Microsoft 365, and SPFx solutions focused on governance, permissions, migrations, intranet solutions, automation, and real enterprise problems.
 
-Portfolio: https://www.billyperalta.com  
+Portfolio: https://www.billyperalta.com
 Contact: https://www.billyperalta.com/contact
