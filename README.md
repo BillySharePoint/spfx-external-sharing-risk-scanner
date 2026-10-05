@@ -364,5 +364,10 @@ Created by Billy Peralta.
 
 I build practical SharePoint, Microsoft 365, and SPFx solutions focused on governance, permissions, migrations, intranet solutions, automation, and real enterprise problems.
 
-Portfolio: https://www.billyperalta.com
-Contact: https://www.billyperalta.com/contact
+---
+
+## Related
+
+- Article: [Building a SharePoint External Sharing Risk Scanner with SPFx](https://www.billyperalta.com/blog/building-sharepoint-external-sharing-risk-scanner-spfx/?utm_source=github&utm_medium=referral&utm_campaign=spfx_external_sharing_risk_scanner&utm_content=readme_article)
+- Preparing for an audit or Copilot? See the [SharePoint permissions and oversharing assessment](https://www.billyperalta.com/services/sharepoint-permissions-cleanup-consultant/?utm_source=github&utm_medium=referral&utm_campaign=spfx_external_sharing_risk_scanner&utm_content=readme_service_cta).
+- Author: [Billy Peralta](https://www.billyperalta.com/?utm_source=github&utm_medium=referral&utm_campaign=spfx_external_sharing_risk_scanner), SharePoint and Microsoft 365 consultant, Vancouver, BC
